@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Possession & Rebound Simulator</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1100px; margin: 20px auto; }
+    h2 { margin-top: 0; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 16px; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: center; }
+    .team-title { background: #eee; font-weight: bold; }
+    .scoreboard { display: flex; justify-content: space-between; margin-top: 10px; }
+    .box { border: 1px solid #ccc; padding: 8px; width: 48%; }
+    input[type="number"] { width: 70px; }
+  </style>
+</head>
+<body>
+
+<h2>High School Possession & Rebound Simulator</h2>
+<p>Adjust possessions, shooting percentages, rebounds, and turnovers for both teams. The projected score updates instantly.</p>
+
+<table>
+  <tr>
+    <th></th>
+    <th colspan="8" class="team-title">Home Team</th>
+  </tr>
+  <tr>
+    <th>Stat</th>
+    <th>Possessions</th>
+    <th>2FG%</th>
+    <th>3FG%</th>
+    <th>% Shots 3s</th>
+    <th>FTA</th>
+    <th>FT%</th>
+    <th>Off Reb</th>
+    <th>Turnovers</th>
+  </tr>
+  <tr>
+    <td>Values</td>
+    <td><input id="h_pos" type="number" value="60" min="30" max="90"></td>
+    <td><input id="h_2fg" type="number" value="48" min="20" max="70"></td>
+    <td><input id="h_3fg" type="number" value="35" min="10" max="60"></td>
+    <td><input id="h_3rate" type="number" value="30" min="0" max="70"></td>
+    <td><input id="h_fta" type="number" value="15" min="0" max="40"></td>
+    <td><input id="h_ft" type="number" value="70" min="40" max="95"></td>
+    <td><input id="h_orb" type="number" value="10" min="0" max="30"></td>
+    <td><input id="h_tov" type="number" value="14" min="0" max="30"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <th></th>
+    <th colspan="8" class="team-title">Away Team</th>
+  </tr>
+  <tr>
+    <th>Stat</th>
+    <th>Possessions</th>
+    <th>2FG%</th>
+    <th>3FG%</th>
+    <th>% Shots 3s</th>
+    <th>FTA</th>
+    <th>FT%</th>
+    <th>Off Reb</th>
+    <th>Turnovers</th>
+  </tr>
+  <tr>
+    <td>Values</td>
+    <td><input id="a_pos" type="number" value="60" min="30" max="90"></td>
+    <td><input id="a_2fg" type="number" value="45" min="20" max="70"></td>
+    <td><input id="a_3fg" type="number" value="32" min="10" max="60"></td>
+    <td><input id="a_3rate" type="number" value="30" min="0" max="70"></td>
+    <td><input id="a_fta" type="number" value="15" min="0" max="40"></td>
+    <td><input id="a_ft" type="number" value="68" min="40" max="95"></td>
+    <td><input id="a_orb" type="number" value="8" min="0" max="30"></td>
+    <td><input id="a_tov" type="number" value="16" min="0" max="30"></td>
+  </tr>
+</table>
+
+<div class="scoreboard">
+  <div class="box">
+    <h3>Home Summary</h3>
+    <div id="homeSummary"></div>
+  </div>
+  <div class="box">
+    <h3>Away Summary</h3>
+    <div id="awaySummary"></div>
+  </div>
+</div>
+
+<div class="box" style="margin-top:16px;">
+  <h3>Game Comparison</h3>
+  <div id="comparison"></div>
+</div>
+
+<script>
+function calcTeam(prefix) {
+  const P   = parseFloat(document.getElementById(prefix + '_pos').value)  || 0;
+  const fg2 = parseFloat(document.getElementById(prefix + '_2fg').value)  || 0;
+  const fg3 = parseFloat(document.getElementById(prefix + '_3fg').value)  || 0;
+  const r3  = parseFloat(document.getElementById(prefix + '_3rate').value)|| 0;
+  const FTA = parseFloat(document.getElementById(prefix + '_fta').value)  || 0;
+  const ft  = parseFloat(document.getElementById(prefix + '_ft').value)   || 0;
+  const ORB = parseFloat(document.getElementById(prefix + '_orb').value)  || 0;
+  const TOV = parseFloat(document.getElementById(prefix + '_tov').value)  || 0;
+
+  // Dean Oliver possessions formula rearranged for FGA
+  let FGA = P + ORB - TOV - 0.44 * FTA;
+  if (FGA < 0) FGA = 0;
+
+  const threeRate = Math.min(Math.max(r3 / 100, 0), 1);
+  const threePA = FGA * threeRate;
+  const twoPA   = FGA - threePA;
+
+  const twoPM   = twoPA   * (fg2 / 100);
+  const threePM = threePA * (fg3 / 100);
+  const FTM     = FTA     * (ft  / 100);
+
+  const points = 2 * twoPM + 3 * threePM + FTM;
+  const ppp    = (P > 0) ? points / P : 0;
+
+  return {
+    P, FGA, twoPA, threePA,
+    ORB, TOV, FTA,
+    points: points,
+    ppp: ppp
+  };
+}
+
+function formatSummary(label, team) {
+  return `
+    Possessions: ${team.P.toFixed(1)}<br>
+    FGA: ${team.FGA.toFixed(1)} (2PA: ${team.twoPA.toFixed(1)}, 3PA: ${team.threePA.toFixed(1)})<br>
+    FTA: ${team.FTA.toFixed(1)}<br>
+    Off Rebounds: ${team.ORB.toFixed(1)}<br>
+    Turnovers: ${team.TOV.toFixed(1)}<br>
+    Points: <strong>${team.points.toFixed(1)}</strong><br>
+    Points per Possession: ${team.ppp.toFixed(3)}
+  `;
+}
+
+function update() {
+  const home = calcTeam('h');
+  const away = calcTeam('a');
+
+  document.getElementById('homeSummary').innerHTML = formatSummary('Home', home);
+  document.getElementById('awaySummary').innerHTML = formatSummary('Away', away);
+
+  const rebMargin = (home.ORB - away.ORB).toFixed(1);
+  const tovMargin = (away.TOV - home.TOV).toFixed(1); // positive if home has fewer TOs
+  const scoreDiff = (home.points - away.points).toFixed(1);
+
+  document.getElementById('comparison').innerHTML = `
+    Projected Final Score: Home ${home.points.toFixed(1)} – Away ${away.points.toFixed(1)}<br>
+    Score Margin (Home): <strong>${scoreDiff}</strong> points<br>
+    Offensive Rebound Margin (Home – Away): ${rebMargin}<br>
+    Turnover Margin (Home fewer TOs): ${tovMargin}<br>
+    Efficiency: Home ${home.ppp.toFixed(3)} PPP, Away ${away.ppp.toFixed(3)} PPP
+  `;
+}
+
+// hook events
+document.querySelectorAll('input[type="number"]').forEach(el => {
+  el.addEventListener('input', update);
+});
+
+// initial draw
+update();
+</script>
+
+</body>
+</html>
