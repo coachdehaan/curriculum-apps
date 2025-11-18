@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Chem-Name Builder v2</title>
+  <title>Chem-Name Builder v3</title>
   <style>
     * { box-sizing: border-box; font-family: Arial, sans-serif; }
     body {
@@ -28,6 +28,8 @@
       padding: 6px;
       border-radius: 3px;
     }
+
+    /* Periodic table */
     #periodic-table {
       display: grid;
       grid-template-columns: repeat(18, 1fr);
@@ -55,6 +57,25 @@
     }
     .element.selected {
       outline: 2px solid #000;
+    }
+
+    /* Polyatomic buttons */
+    #poly-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 10px;
+    }
+    .poly-btn {
+      border: 1px solid #777;
+      border-radius: 3px;
+      padding: 2px 4px;
+      cursor: pointer;
+      background-color: #fff9e6;
+      user-select: none;
+    }
+    .poly-btn:hover {
+      border-color: #000;
     }
 
     /* Builder */
@@ -125,17 +146,6 @@
       font-size: 11px;
       white-space: pre-line;
     }
-    #pair-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 10px;
-      margin-top: 2px;
-    }
-    #pair-table th, #pair-table td {
-      border: 1px solid #ccc;
-      padding: 2px 3px;
-      text-align: left;
-    }
     #explanation {
       font-size: 11px;
       white-space: pre-line;
@@ -156,30 +166,39 @@
       <h2>Interactive Periodic Table</h2>
       <div id="periodic-table"></div>
     </div>
+    <div class="panel">
+      <h2>Common Polyatomic Ions</h2>
+      <div id="poly-list"></div>
+    </div>
     <div class="panel" style="font-size: 11px;">
-      <strong>How to use in class:</strong>
+      <strong>Use in class:</strong>
       <ol style="margin: 4px 0 0 16px; padding-left: 8px;">
-        <li>Choose active slot (1, 2, or 3) and click an element.</li>
-        <li>Slots 1 and 2 → formula, name, main bond type.</li>
-        <li>Slot 3 → extra EN comparisons (Honors: triads).</li>
-        <li>For covalent, adjust subscripts. Ionic subscripts are auto-balanced.</li>
+        <li>Choose active slot (1 or 2).</li>
+        <li>Click an element <em>or</em> polyatomic ion.</li>
+        <li>If both are elements:
+          <ul style="margin: 0 0 0 14px; padding-left: 6px;">
+            <li>Metal + nonmetal → ionic naming (charges auto-balanced).</li>
+            <li>Nonmetal + nonmetal → covalent naming (use subscripts n₁, n₂).</li>
+          </ul>
+        </li>
+        <li>If any polyatomic ion is used → ionic naming with polyatomics.</li>
       </ol>
     </div>
   </div>
 
   <div id="right">
     <div class="panel" id="builder">
-      <h2>Element Slots (1 & 2 used for naming)</h2>
+      <h2>Species Slots (1 & 2)</h2>
       <div class="slots-row">
         <div class="slot" id="slot1">
           <div class="slot-header">
-            <span><input type="radio" name="activeSlot" value="1" checked /> Element 1</span>
+            <span><input type="radio" name="activeSlot" value="1" checked /> Slot 1</span>
             <button type="button" onclick="clearSlot(1)" style="font-size: 10px;">Clear</button>
           </div>
           <div class="slot-body">
             <div>
               <div class="slot-symbol" id="slot1-symbol">–</div>
-              <div class="slot-meta" id="slot1-name">No element</div>
+              <div class="slot-meta" id="slot1-name">No species</div>
             </div>
             <div class="controls">
               <span>n₁:</span>
@@ -189,13 +208,13 @@
         </div>
         <div class="slot" id="slot2">
           <div class="slot-header">
-            <span><input type="radio" name="activeSlot" value="2" /> Element 2</span>
+            <span><input type="radio" name="activeSlot" value="2" /> Slot 2</span>
             <button type="button" onclick="clearSlot(2)" style="font-size: 10px;">Clear</button>
           </div>
           <div class="slot-body">
             <div>
               <div class="slot-symbol" id="slot2-symbol">–</div>
-              <div class="slot-meta" id="slot2-name">No element</div>
+              <div class="slot-meta" id="slot2-name">No species</div>
             </div>
             <div class="controls">
               <span>n₂:</span>
@@ -203,31 +222,15 @@
             </div>
           </div>
         </div>
-        <div class="slot" id="slot3">
-          <div class="slot-header">
-            <span><input type="radio" name="activeSlot" value="3" /> Element 3 (EN only)</span>
-            <button type="button" onclick="clearSlot(3)" style="font-size: 10px;">Clear</button>
-          </div>
-          <div class="slot-body">
-            <div>
-              <div class="slot-symbol" id="slot3-symbol">–</div>
-              <div class="slot-meta" id="slot3-name">No element</div>
-            </div>
-            <div class="controls">
-              <span>n₃:</span>
-              <input type="number" id="slot3-count" min="1" max="10" value="1" onchange="updateAll()" />
-            </div>
-          </div>
-        </div>
       </div>
-      <button type="button" onclick="swapSlots12()" style="margin-top: 4px; font-size: 10px;">Swap 1 ↔ 2</button>
+      <button type="button" onclick="swapSlots()" style="margin-top: 4px; font-size: 10px;">Swap 1 ↔ 2</button>
     </div>
 
     <div class="panel">
-      <h2>Results (Slots 1 & 2)</h2>
+      <h2>Results</h2>
       <table id="results-table">
         <tr>
-          <td style="width: 32%;">Formula (1 & 2)</td>
+          <td style="width: 32%;">Formula</td>
           <td><span id="formula-display">–</span></td>
         </tr>
         <tr>
@@ -236,19 +239,7 @@
         </tr>
         <tr>
           <td>Bond & EN</td>
-          <td>
-            <div id="bond-summary"></div>
-            <table id="pair-table">
-              <thead>
-                <tr>
-                  <th>Pair</th>
-                  <th>ΔEN</th>
-                  <th>Type</th>
-                </tr>
-              </thead>
-              <tbody id="pair-body"></tbody>
-            </table>
-          </td>
+          <td><div id="bond-summary"></div></td>
         </tr>
         <tr>
           <td>Why this name?</td>
@@ -259,32 +250,52 @@
   </div>
 
   <script>
-    // ======== ELEMENT DATA (first 20, enough for core HS naming) ========
+    // ======== ELEMENT DATA (first 20, HS core) ========
     const elements = [
-      {Z:1,  row:1, col:1,  symbol:"H",  name:"Hydrogen",  EN:2.20, category:"nonmetal",  isMetal:false, commonIonCharge:1},
-      {Z:2,  row:1, col:18, symbol:"He", name:"Helium",    EN:null, category:"nonmetal",  isMetal:false},
-      {Z:3,  row:2, col:1,  symbol:"Li", name:"Lithium",   EN:0.98, category:"metal",     isMetal:true,  commonIonCharge:1},
-      {Z:4,  row:2, col:2,  symbol:"Be", name:"Beryllium", EN:1.57, category:"metal",     isMetal:true,  commonIonCharge:2},
-      {Z:5,  row:2, col:13, symbol:"B",  name:"Boron",     EN:2.04, category:"metalloid", isMetal:false},
-      {Z:6,  row:2, col:14, symbol:"C",  name:"Carbon",    EN:2.55, category:"nonmetal",  isMetal:false},
-      {Z:7,  row:2, col:15, symbol:"N",  name:"Nitrogen",  EN:3.04, category:"nonmetal",  isMetal:false, commonIonCharge:-3},
-      {Z:8,  row:2, col:16, symbol:"O",  name:"Oxygen",    EN:3.44, category:"nonmetal",  isMetal:false, commonIonCharge:-2},
-      {Z:9,  row:2, col:17, symbol:"F",  name:"Fluorine",  EN:3.98, category:"nonmetal",  isMetal:false, commonIonCharge:-1},
-      {Z:10, row:2, col:18, symbol:"Ne", name:"Neon",      EN:null, category:"nonmetal",  isMetal:false},
-      {Z:11, row:3, col:1,  symbol:"Na", name:"Sodium",    EN:0.93, category:"metal",     isMetal:true,  commonIonCharge:1},
-      {Z:12, row:3, col:2,  symbol:"Mg", name:"Magnesium", EN:1.31, category:"metal",     isMetal:true,  commonIonCharge:2},
-      {Z:13, row:3, col:13, symbol:"Al", name:"Aluminum",  EN:1.61, category:"metal",     isMetal:true,  commonIonCharge:3},
-      {Z:14, row:3, col:14, symbol:"Si", name:"Silicon",   EN:1.90, category:"metalloid", isMetal:false},
-      {Z:15, row:3, col:15, symbol:"P",  name:"Phosphorus",EN:2.19, category:"nonmetal",  isMetal:false, commonIonCharge:-3},
-      {Z:16, row:3, col:16, symbol:"S",  name:"Sulfur",    EN:2.58, category:"nonmetal",  isMetal:false, commonIonCharge:-2},
-      {Z:17, row:3, col:17, symbol:"Cl", name:"Chlorine",  EN:3.16, category:"nonmetal",  isMetal:false, commonIonCharge:-1},
-      {Z:18, row:3, col:18, symbol:"Ar", name:"Argon",     EN:null, category:"nonmetal",  isMetal:false},
-      {Z:19, row:4, col:1,  symbol:"K",  name:"Potassium", EN:0.82, category:"metal",     isMetal:true,  commonIonCharge:1},
-      {Z:20, row:4, col:2,  symbol:"Ca", name:"Calcium",   EN:1.00, category:"metal",     isMetal:true,  commonIonCharge:2}
+      {Z:1,  row:1, col:1,  symbol:"H",  name:"Hydrogen",  EN:2.20, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:1},
+      {Z:2,  row:1, col:18, symbol:"He", name:"Helium",    EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
+      {Z:3,  row:2, col:1,  symbol:"Li", name:"Lithium",   EN:0.98, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
+      {Z:4,  row:2, col:2,  symbol:"Be", name:"Beryllium", EN:1.57, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
+      {Z:5,  row:2, col:13, symbol:"B",  name:"Boron",     EN:2.04, category:"metalloid", isMetal:false, isPoly:false},
+      {Z:6,  row:2, col:14, symbol:"C",  name:"Carbon",    EN:2.55, category:"nonmetal",  isMetal:false, isPoly:false},
+      {Z:7,  row:2, col:15, symbol:"N",  name:"Nitrogen",  EN:3.04, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-3},
+      {Z:8,  row:2, col:16, symbol:"O",  name:"Oxygen",    EN:3.44, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-2},
+      {Z:9,  row:2, col:17, symbol:"F",  name:"Fluorine",  EN:3.98, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
+      {Z:10, row:2, col:18, symbol:"Ne", name:"Neon",      EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
+      {Z:11, row:3, col:1,  symbol:"Na", name:"Sodium",    EN:0.93, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
+      {Z:12, row:3, col:2,  symbol:"Mg", name:"Magnesium", EN:1.31, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
+      {Z:13, row:3, col:13, symbol:"Al", name:"Aluminum",  EN:1.61, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:3},
+      {Z:14, row:3, col:14, symbol:"Si", name:"Silicon",   EN:1.90, category:"metalloid", isMetal:false, isPoly:false},
+      {Z:15, row:3, col:15, symbol:"P",  name:"Phosphorus",EN:2.19, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-3},
+      {Z:16, row:3, col:16, symbol:"S",  name:"Sulfur",    EN:2.58, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-2},
+      {Z:17, row:3, col:17, symbol:"Cl", name:"Chlorine",  EN:3.16, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
+      {Z:18, row:3, col:18, symbol:"Ar", name:"Argon",     EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
+      {Z:19, row:4, col:1,  symbol:"K",  name:"Potassium", EN:0.82, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
+      {Z:20, row:4, col:2,  symbol:"Ca", name:"Calcium",   EN:1.00, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2}
+    ];
+
+    // ======== POLYATOMIC IONS (HS core) ========
+    const polyIons = [
+      // Cations
+      {id:"NH4", symbol:"NH₄⁺", formula:"NH4", name:"ammonium", charge:+1, isMetal:false, isPoly:true},
+      // Anions
+      {id:"OH",  symbol:"OH⁻",  formula:"OH",  name:"hydroxide", charge:-1, isMetal:false, isPoly:true},
+      {id:"NO3", symbol:"NO₃⁻", formula:"NO3", name:"nitrate",   charge:-1, isMetal:false, isPoly:true},
+      {id:"NO2", symbol:"NO₂⁻", formula:"NO2", name:"nitrite",   charge:-1, isMetal:false, isPoly:true},
+      {id:"SO4", symbol:"SO₄²⁻",formula:"SO4", name:"sulfate",   charge:-2, isMetal:false, isPoly:true},
+      {id:"SO3", symbol:"SO₃²⁻",formula:"SO3", name:"sulfite",   charge:-2, isMetal:false, isPoly:true},
+      {id:"CO3", symbol:"CO₃²⁻",formula:"CO3", name:"carbonate", charge:-2, isMetal:false, isPoly:true},
+      {id:"HCO3",symbol:"HCO₃⁻",formula:"HCO3",name:"hydrogen carbonate", charge:-1, isMetal:false, isPoly:true},
+      {id:"PO4", symbol:"PO₄³⁻",formula:"PO4", name:"phosphate", charge:-3, isMetal:false, isPoly:true},
+      {id:"C2H3O2",symbol:"C₂H₃O₂⁻", formula:"C2H3O2", name:"acetate", charge:-1, isMetal:false, isPoly:true},
+      {id:"CN",  symbol:"CN⁻",  formula:"CN",  name:"cyanide",   charge:-1, isMetal:false, isPoly:true},
+      {id:"ClO3",symbol:"ClO₃⁻",formula:"ClO3", name:"chlorate", charge:-1, isMetal:false, isPoly:true}
     ];
 
     const tableContainer = document.getElementById("periodic-table");
+    const polyListContainer = document.getElementById("poly-list");
 
+    // ======== BUILD PERIODIC TABLE ========
     function buildPeriodicTable() {
       const maxRows = 7;
       const maxCols = 18;
@@ -316,10 +327,21 @@
       }
     }
 
+    // ======== BUILD POLY LIST ========
+    function buildPolyList() {
+      polyIons.forEach(pi => {
+        const btn = document.createElement("div");
+        btn.classList.add("poly-btn");
+        btn.textContent = `${pi.symbol} (${pi.name})`;
+        btn.title = `${pi.name}, charge ${pi.charge > 0 ? "+" + pi.charge : pi.charge}`;
+        btn.onclick = () => handlePolyClick(pi.id);
+        polyListContainer.appendChild(btn);
+      });
+    }
+
     // ======== STATE ========
-    let slot1Element = null;
-    let slot2Element = null;
-    let slot3Element = null;
+    let slot1 = null; // { kind: 'element'|'poly', data: {} }
+    let slot2 = null;
 
     function getActiveSlot() {
       const radios = document.getElementsByName("activeSlot");
@@ -331,84 +353,93 @@
       const el = elements.find(e => e.symbol === symbol);
       if (!el) return;
       const active = getActiveSlot();
+      const wrapped = { kind:"element", data: el };
+
       if (active === 1) {
-        slot1Element = el;
+        slot1 = wrapped;
         document.getElementById("slot1-symbol").textContent = el.symbol;
         document.getElementById("slot1-name").textContent = el.name;
-      } else if (active === 2) {
-        slot2Element = el;
+      } else {
+        slot2 = wrapped;
         document.getElementById("slot2-symbol").textContent = el.symbol;
         document.getElementById("slot2-name").textContent = el.name;
-      } else {
-        slot3Element = el;
-        document.getElementById("slot3-symbol").textContent = el.symbol;
-        document.getElementById("slot3-name").textContent = el.name;
       }
-      clearSelectionHighlight();
-      highlightSelected();
+      refreshSelectionHighlight();
+      updateAll();
+    }
+
+    function handlePolyClick(id) {
+      const pi = polyIons.find(p => p.id === id);
+      if (!pi) return;
+      const active = getActiveSlot();
+      const wrapped = { kind:"poly", data: pi };
+
+      if (active === 1) {
+        slot1 = wrapped;
+        document.getElementById("slot1-symbol").textContent = pi.symbol;
+        document.getElementById("slot1-name").textContent = pi.name + " (polyatomic ion)";
+      } else {
+        slot2 = wrapped;
+        document.getElementById("slot2-symbol").textContent = pi.symbol;
+        document.getElementById("slot2-name").textContent = pi.name + " (polyatomic ion)";
+      }
+      refreshSelectionHighlight();
       updateAll();
     }
 
     function clearSlot(i) {
       if (i === 1) {
-        slot1Element = null;
+        slot1 = null;
         document.getElementById("slot1-symbol").textContent = "–";
-        document.getElementById("slot1-name").textContent = "No element";
-      } else if (i === 2) {
-        slot2Element = null;
-        document.getElementById("slot2-symbol").textContent = "–";
-        document.getElementById("slot2-name").textContent = "No element";
+        document.getElementById("slot1-name").textContent = "No species";
       } else {
-        slot3Element = null;
-        document.getElementById("slot3-symbol").textContent = "–";
-        document.getElementById("slot3-name").textContent = "No element";
+        slot2 = null;
+        document.getElementById("slot2-symbol").textContent = "–";
+        document.getElementById("slot2-name").textContent = "No species";
       }
-      clearSelectionHighlight();
-      highlightSelected();
+      refreshSelectionHighlight();
       updateAll();
     }
 
-    function swapSlots12() {
-      const tmpEl = slot1Element;
-      slot1Element = slot2Element;
-      slot2Element = tmpEl;
-
+    function swapSlots() {
+      const tmp = slot1;
+      slot1 = slot2;
+      slot2 = tmp;
       const c1 = document.getElementById("slot1-count");
       const c2 = document.getElementById("slot2-count");
-      const tmpCount = c1.value;
+      const tmpVal = c1.value;
       c1.value = c2.value;
-      c2.value = tmpCount;
+      c2.value = tmpVal;
 
-      if (slot1Element) {
-        document.getElementById("slot1-symbol").textContent = slot1Element.symbol;
-        document.getElementById("slot1-name").textContent = slot1Element.name;
-      } else {
-        document.getElementById("slot1-symbol").textContent = "–";
-        document.getElementById("slot1-name").textContent = "No element";
+      // Update display labels
+      function renderSlot(slot, symId, nameId) {
+        if (!slot) {
+          document.getElementById(symId).textContent = "–";
+          document.getElementById(nameId).textContent = "No species";
+        } else if (slot.kind === "element") {
+          document.getElementById(symId).textContent = slot.data.symbol;
+          document.getElementById(nameId).textContent = slot.data.name;
+        } else {
+          document.getElementById(symId).textContent = slot.data.symbol;
+          document.getElementById(nameId).textContent = slot.data.name + " (polyatomic ion)";
+        }
       }
-      if (slot2Element) {
-        document.getElementById("slot2-symbol").textContent = slot2Element.symbol;
-        document.getElementById("slot2-name").textContent = slot2Element.name;
-      } else {
-        document.getElementById("slot2-symbol").textContent = "–";
-        document.getElementById("slot2-name").textContent = "No element";
-      }
-      clearSelectionHighlight();
-      highlightSelected();
+      renderSlot(slot1, "slot1-symbol", "slot1-name");
+      renderSlot(slot2, "slot2-symbol", "slot2-name");
+
+      refreshSelectionHighlight();
       updateAll();
     }
 
-    function clearSelectionHighlight() {
+    function refreshSelectionHighlight() {
       document.querySelectorAll(".element").forEach(cell => cell.classList.remove("selected"));
-    }
-
-    function highlightSelected() {
-      const syms = [];
-      if (slot1Element) syms.push(slot1Element.symbol);
-      if (slot2Element) syms.push(slot2Element.symbol);
-      if (slot3Element) syms.push(slot3Element.symbol);
+      const selectedSymbols = [];
+      if (slot1 && slot1.kind === "element") selectedSymbols.push(slot1.data.symbol);
+      if (slot2 && slot2.kind === "element") selectedSymbols.push(slot2.data.symbol);
       document.querySelectorAll(".element").forEach(cell => {
-        if (syms.includes(cell.dataset.symbol)) cell.classList.add("selected");
+        if (selectedSymbols.includes(cell.dataset.symbol)) {
+          cell.classList.add("selected");
+        }
       });
     }
 
@@ -423,7 +454,7 @@
       7: "hepta",
       8: "octa",
       9: "nona",
-      10: "deca"
+      10:"deca"
     };
 
     function anionStem(name) {
@@ -446,18 +477,29 @@
       return gcd(b, a % b);
     }
 
-    function subscript(n) {
-      return n === 1 ? "" : n.toString();
-    }
-
     function classifyBond(en1, en2) {
-      if (en1 == null || en2 == null) return {delta: null, type: "EN missing"};
+      if (en1 == null || en2 == null) return {delta:null, type:"EN missing"};
       const d = Math.abs(en1 - en2);
       let t;
       if (d > 1.7) t = "Ionic";
       else if (d >= 0.4) t = "Polar covalent";
       else t = "Non-polar covalent";
-      return {delta: d, type: t};
+      return {delta:d, type:t};
+    }
+
+    function subscript(n) {
+      return n === 1 ? "" : n.toString();
+    }
+
+    function renderSpeciesFormula(slot, count) {
+      if (!slot) return "";
+      if (slot.kind === "element") {
+        return slot.data.symbol + subscript(count);
+      } else {
+        // polyatomic: parentheses if count > 1
+        if (count === 1) return slot.data.formula;
+        return "(" + slot.data.formula + ")" + subscript(count);
+      }
     }
 
     // ======== MAIN UPDATE ========
@@ -465,70 +507,132 @@
       const formulaDisplay = document.getElementById("formula-display");
       const nameDisplay = document.getElementById("name-display");
       const bondSummary = document.getElementById("bond-summary");
-      const pairBody = document.getElementById("pair-body");
       const explanation = document.getElementById("explanation");
 
       const n1 = parseInt(document.getElementById("slot1-count").value, 10) || 1;
       const n2 = parseInt(document.getElementById("slot2-count").value, 10) || 1;
-      const n3 = parseInt(document.getElementById("slot3-count").value, 10) || 1;
 
-      pairBody.innerHTML = "";
-
-      if (!slot1Element || !slot2Element) {
+      if (!slot1 || !slot2) {
         formulaDisplay.textContent = "–";
         nameDisplay.textContent = "–";
-        bondSummary.textContent = "Select at least elements in slots 1 and 2 to get a formula, name, and main bond type.";
+        bondSummary.textContent = "Select species in both Slot 1 and Slot 2.";
         explanation.textContent = "";
-        renderPairRow("1–2", slot1Element, slot2Element);
-        renderPairRow("1–3", slot1Element, slot3Element);
-        renderPairRow("2–3", slot2Element, slot3Element);
         return;
       }
 
-      const e1 = slot1Element;
-      const e2 = slot2Element;
+      const s1 = slot1;
+      const s2 = slot2;
 
-      const isIonicByType =
-        (e1.isMetal && !e2.isMetal) ||
-        (e2.isMetal && !e1.isMetal);
+      // Determine if ionic or covalent overall
+      const anyPoly = (s1.kind === "poly" || s2.kind === "poly");
+      const s1IsMetal = (s1.kind === "element" && s1.data.isMetal);
+      const s2IsMetal = (s2.kind === "element" && s2.data.isMetal);
+      const bothElements = (s1.kind === "element" && s2.kind === "element");
+      const ionicByType = anyPoly || (s1IsMetal !== s2IsMetal);
 
       let formula = "";
       let compoundName = "";
-      let explainText = "";
       let modeLabel = "";
+      let explainText = "";
 
-      if (isIonicByType) {
-        // Ionic: ignore user subscripts; use charges to balance.
-        const cation = e1.isMetal ? e1 : e2;
-        const anion = e1.isMetal ? e2 : e1;
-        const cCharge = cation.commonIonCharge ?? 1;
-        const aCharge = anion.commonIonCharge ?? -1;
+      if (ionicByType) {
+        // IONIC NAMING
+        modeLabel = "[Ionic: contains metal and/or polyatomic ion]";
+        // Identify positive "cation-like" and negative "anion-like"
+        let cationSlot, anionSlot;
+        let cCharge, aCharge;
+
+        if (anyPoly) {
+          // If poly is positive, it's cation; if negative, it's anion.
+          // Otherwise, use metal as cation.
+          function chargeOf(slot) {
+            if (slot.kind === "poly") return slot.data.charge;
+            if (slot.kind === "element" && typeof slot.data.commonIonCharge === "number") {
+              return slot.data.commonIonCharge;
+            }
+            return 0;
+          }
+          const q1 = chargeOf(s1);
+          const q2 = chargeOf(s2);
+
+          if (q1 > 0) { cationSlot = s1; cCharge = q1; }
+          if (q2 > 0 && (!cationSlot)) { cationSlot = s2; cCharge = q2; }
+
+          if (q1 < 0) { anionSlot = s1; aCharge = q1; }
+          if (q2 < 0 && (!anionSlot)) { anionSlot = s2; aCharge = q2; }
+
+          // fallback if something missing: treat metal as cation
+          if (!cationSlot || !anionSlot) {
+            if (s1IsMetal) { cationSlot = s1; anionSlot = s2; cCharge = s1.data.commonIonCharge ?? +1; aCharge = -1; }
+            else if (s2IsMetal) { cationSlot = s2; anionSlot = s1; cCharge = s2.data.commonIonCharge ?? +1; aCharge = -1; }
+            else { cationSlot = s1; anionSlot = s2; cCharge = +1; aCharge = -1; }
+          }
+        } else {
+          // no polyatomic, but metal + nonmetal
+          const cationElement = s1IsMetal ? s1 : s2;
+          const anionElement = s1IsMetal ? s2 : s1;
+          cationSlot = cationElement;
+          anionSlot = anionElement;
+          cCharge = cationElement.data.commonIonCharge ?? +1;
+          aCharge = anionElement.data.commonIonCharge ?? -1;
+        }
+
         const a = Math.abs(cCharge);
         const b = Math.abs(aCharge);
         const g = gcd(a, b);
         const nCation = b / g;
         const nAnion = a / g;
 
-        if (e1 === cation) {
-          formula = `${cation.symbol}${subscript(nCation)}${anion.symbol}${subscript(nAnion)}`;
-        } else {
-          formula = `${anion.symbol}${subscript(nAnion)}${cation.symbol}${subscript(nCation)}`;
+        // Build formula with parentheses where needed
+        const cationFirst = (cationSlot === s1);
+        const cSym = (cationSlot.kind === "element") ? cationSlot.data.symbol : cationSlot.data.formula;
+        const aSym = (anionSlot.kind === "element") ? anionSlot.data.symbol : anionSlot.data.formula;
+
+        function renderIon(slot, n) {
+          if (slot.kind === "element") {
+            return slot.data.symbol + subscript(n);
+          } else {
+            if (n === 1) return slot.data.formula;
+            return "(" + slot.data.formula + ")" + subscript(n);
+          }
         }
 
-        const cName = cap(cation.name.toLowerCase());
-        const stem = anionStem(anion.name);
-        const anionName = stem + "e"; // oxide, sulfide, etc.
-        compoundName = `${cName} ${anionName}`;
+        if (cationFirst) {
+          formula = renderIon(cationSlot, nCation) + renderIon(anionSlot, nAnion);
+        } else {
+          formula = renderIon(anionSlot, nAnion) + renderIon(cationSlot, nCation);
+        }
 
-        modeLabel = "[Ionic: metal + nonmetal]";
+        // Name
+        let cName, aName;
+        if (cationSlot.kind === "element") {
+          cName = cap(cationSlot.data.name.toLowerCase());
+        } else {
+          cName = cationSlot.data.name; // ammonium
+        }
+
+        if (anionSlot.kind === "element") {
+          const stem = anionStem(anionSlot.data.name);
+          aName = stem + "e"; // oxide, chloride, etc.
+        } else {
+          aName = anionSlot.data.name; // sulfate, nitrate, etc.
+        }
+
+        compoundName = `${cName} ${aName}`;
+
         explainText =
-          "Metal + nonmetal → ionic naming.\n" +
-          `${cation.name} is treated as a cation (positive ion).\n` +
-          `${anion.name} is treated as an anion; its name ends in “-ide”.\n` +
-          "Subscripts are chosen to balance total positive and negative charge.";
-      } else {
-        // Covalent: use user subscripts for 1 & 2
-        formula = `${e1.symbol}${subscript(n1)}${e2.symbol}${subscript(n2)}`;
+          "Ionic naming:\n" +
+          "- At least one species is a metal or a polyatomic ion.\n" +
+          "- Charges are balanced by choosing subscripts so total positive and negative charge cancel.\n" +
+          "- Cation name is written first.\n" +
+          "- Anion is written second; monatomic anions use “-ide”, polyatomic ions keep their name (sulfate, nitrate, etc.).";
+      } else if (bothElements) {
+        // COVALENT NAMING (two elements, both nonmetals/metalloids)
+        modeLabel = "[Covalent: two nonmetals / metalloid + nonmetal]";
+        const e1 = s1.data;
+        const e2 = s2.data;
+
+        formula = e1.symbol + subscript(n1) + e2.symbol + subscript(n2);
 
         let firstName = e1.name.toLowerCase();
         if (n1 > 1 && prefixes[n1]) {
@@ -542,69 +646,63 @@
         }
 
         compoundName = `${cap(firstName)} ${secondName}`;
-        modeLabel = "[Covalent: nonmetal + nonmetal / metalloid]";
 
         explainText =
-          "Nonmetal + nonmetal / metalloid → covalent naming.\n" +
-          `Subscripts (n₁, n₂) come from how many atoms you choose.\n` +
-          "Prefixes (di-, tri-, tetra-, etc.) show the number of atoms.\n" +
-          "The first element omits “mono-” when there is only one atom.";
-      }
-
-      // Bond classification for pair 1–2
-      const mainBond = classifyBond(e1.EN, e2.EN);
-      let mainSummary = "";
-      if (mainBond.delta == null) {
-        mainSummary = `${modeLabel} EN data incomplete for 1–2.`;
+          "Covalent naming:\n" +
+          "- Two nonmetals share electrons.\n" +
+          "- Subscripts n₁ and n₂ come from the number of atoms of each element.\n" +
+          "- Prefixes (mono-, di-, tri-, etc.) show the count.\n" +
+          "- The first element usually drops “mono-” when n₁ = 1.\n" +
+          "- The second element name ends in “-ide”.";
       } else {
-        mainSummary =
-          `${modeLabel} ΔEN(1–2) = |EN(${e1.symbol}) − EN(${e2.symbol})| = ` +
-          `|${e1.EN.toFixed(2)} − ${e2.EN.toFixed(2)}| = ${mainBond.delta.toFixed(2)} → ${mainBond.type}.`;
+        // Fallback: rare cases (e.g., metalloid + something odd)
+        modeLabel = "[Covalent-style naming]";
+        const e1 = (s1.kind === "element") ? s1.data : null;
+        const e2 = (s2.kind === "element") ? s2.data : null;
+        if (e1 && e2) {
+          formula = e1.symbol + subscript(n1) + e2.symbol + subscript(n2);
+          let firstName = e1.name.toLowerCase();
+          if (n1 > 1 && prefixes[n1]) firstName = prefixes[n1] + " " + firstName;
+          const stem = anionStem(e2.name);
+          let secondName = stem + "e";
+          if (prefixes[n2]) secondName = prefixes[n2] + " " + secondName;
+          compoundName = `${cap(firstName)} ${secondName}`;
+        } else {
+          formula = renderSpeciesFormula(s1, n1) + renderSpeciesFormula(s2, n2);
+          compoundName = "(naming not defined for this combination)";
+        }
+        explainText =
+          "This combination does not fit the simple metal/nonmetal or polyatomic patterns.\n" +
+          "Treat it as a covalent-style pair: use prefixes for counts and “-ide” for the second element when appropriate.";
       }
 
-      // Fill main outputs
+      // Bond summary: ΔEN only when both are plain elements
+      let bondText = "";
+      if (bothElements) {
+        const info = classifyBond(s1.data.EN, s2.data.EN);
+        if (info.delta == null) {
+          bondText = `${modeLabel} EN information incomplete for one or both elements.`;
+        } else {
+          bondText =
+            `${modeLabel}\n` +
+            `ΔEN = |EN(${s1.data.symbol}) − EN(${s2.data.symbol})| = ` +
+            `|${s1.data.EN.toFixed(2)} − ${s2.data.EN.toFixed(2)}| = ${info.delta.toFixed(2)} → ${info.type}.`;
+        }
+      } else {
+        bondText =
+          modeLabel + "\n" +
+          "At least one species is polyatomic, so the compound is treated as ionic (ions held together by electrostatic attraction).";
+      }
+
       formulaDisplay.textContent = formula;
       nameDisplay.textContent = compoundName;
-      bondSummary.textContent = mainSummary;
+      bondSummary.textContent = bondText;
       explanation.textContent = explainText;
-
-      // Pair table for Honors EN exploration
-      renderPairRow("1–2", slot1Element, slot2Element);
-      renderPairRow("1–3", slot1Element, slot3Element);
-      renderPairRow("2–3", slot2Element, slot3Element);
-    }
-
-    function renderPairRow(label, eA, eB) {
-      const body = document.getElementById("pair-body");
-      const tr = document.createElement("tr");
-      const tdPair = document.createElement("td");
-      const tdDelta = document.createElement("td");
-      const tdType = document.createElement("td");
-
-      if (!eA || !eB) {
-        tdPair.textContent = label;
-        tdDelta.textContent = "–";
-        tdType.textContent = "—";
-      } else {
-        const info = classifyBond(eA.EN, eB.EN);
-        tdPair.textContent = `${label}: ${eA.symbol}-${eB.symbol}`;
-        if (info.delta == null) {
-          tdDelta.textContent = "n/a";
-          tdType.textContent = "EN missing";
-        } else {
-          tdDelta.textContent = info.delta.toFixed(2);
-          tdType.textContent = info.type;
-        }
-      }
-
-      tr.appendChild(tdPair);
-      tr.appendChild(tdDelta);
-      tr.appendChild(tdType);
-      body.appendChild(tr);
     }
 
     // ======== INIT ========
     buildPeriodicTable();
+    buildPolyList();
     updateAll();
   </script>
 </body>
