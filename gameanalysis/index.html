@@ -17,7 +17,7 @@
 <body>
 
 <h2>High School Possession & Rebound Simulator</h2>
-<p>Adjust possessions, shooting percentages, rebounds, and turnovers for both teams. The projected score updates instantly.</p>
+<p>Change shooting percentages, offensive rebounds, and turnovers. Possessions and scores update automatically.</p>
 
 <table>
   <tr>
@@ -26,7 +26,7 @@
   </tr>
   <tr>
     <th>Stat</th>
-    <th>Possessions</th>
+    <th>Possessions<br>(auto)</th>
     <th>2FG%</th>
     <th>3FG%</th>
     <th>% Shots 3s</th>
@@ -37,7 +37,8 @@
   </tr>
   <tr>
     <td>Values</td>
-    <td><input id="h_pos" type="number" value="60" min="30" max="90"></td>
+    <!-- possessions is now read-only / auto-calculated -->
+    <td><input id="h_pos" type="number" value="60" readonly></td>
     <td><input id="h_2fg" type="number" value="48" min="20" max="70"></td>
     <td><input id="h_3fg" type="number" value="35" min="10" max="60"></td>
     <td><input id="h_3rate" type="number" value="30" min="0" max="70"></td>
@@ -55,7 +56,7 @@
   </tr>
   <tr>
     <th>Stat</th>
-    <th>Possessions</th>
+    <th>Possessions<br>(auto)</th>
     <th>2FG%</th>
     <th>3FG%</th>
     <th>% Shots 3s</th>
@@ -66,7 +67,8 @@
   </tr>
   <tr>
     <td>Values</td>
-    <td><input id="a_pos" type="number" value="60" min="30" max="90"></td>
+    <!-- possessions is now read-only / auto-calculated -->
+    <td><input id="a_pos" type="number" value="60" readonly></td>
     <td><input id="a_2fg" type="number" value="45" min="20" max="70"></td>
     <td><input id="a_3fg" type="number" value="32" min="10" max="60"></td>
     <td><input id="a_3rate" type="number" value="30" min="0" max="70"></td>
@@ -94,8 +96,12 @@
 </div>
 
 <script>
-function calcTeam(prefix) {
-  const P   = parseFloat(document.getElementById(prefix + '_pos').value)  || 0;
+// Base field-goal attempts per team (can tweak if you want a faster/slower league)
+const BASE_FGA_HOME = 55;
+const BASE_FGA_AWAY = 55;
+
+// core calculator: everything driven by shooting, ORB, TOV, FTA
+function calcTeam(prefix, baseFGA) {
   const fg2 = parseFloat(document.getElementById(prefix + '_2fg').value)  || 0;
   const fg3 = parseFloat(document.getElementById(prefix + '_3fg').value)  || 0;
   const r3  = parseFloat(document.getElementById(prefix + '_3rate').value)|| 0;
@@ -104,9 +110,7 @@ function calcTeam(prefix) {
   const ORB = parseFloat(document.getElementById(prefix + '_orb').value)  || 0;
   const TOV = parseFloat(document.getElementById(prefix + '_tov').value)  || 0;
 
-  // Dean Oliver possessions formula rearranged for FGA
-  let FGA = P + ORB - TOV - 0.44 * FTA;
-  if (FGA < 0) FGA = 0;
+  const FGA = baseFGA; // fixed attempts; pace emerges via possessions formula
 
   const threeRate = Math.min(Math.max(r3 / 100, 0), 1);
   const threePA = FGA * threeRate;
@@ -116,21 +120,31 @@ function calcTeam(prefix) {
   const threePM = threePA * (fg3 / 100);
   const FTM     = FTA     * (ft  / 100);
 
-  const points = 2 * twoPM + 3 * threePM + FTM;
-  const ppp    = (P > 0) ? points / P : 0;
+  // base points from original shots
+  const basePoints = 2 * twoPM + 3 * threePM + FTM;
+
+  // extra points from offensive rebounds (putbacks)
+  const putbackPoints = ORB * (fg2 / 100) * 2;
+
+  const points = basePoints + putbackPoints;
+
+  // possessions auto-calculated (Dean Oliver style)
+  const P = FGA + 0.44 * FTA + TOV - ORB;
+
+  const ppp = (P > 0) ? points / P : 0;
 
   return {
     P, FGA, twoPA, threePA,
     ORB, TOV, FTA,
-    points: points,
-    ppp: ppp
+    points, ppp
   };
 }
 
-function formatSummary(label, team) {
+function formatSummary(team) {
   return `
-    Possessions: ${team.P.toFixed(1)}<br>
-    FGA: ${team.FGA.toFixed(1)} (2PA: ${team.twoPA.toFixed(1)}, 3PA: ${team.threePA.toFixed(1)})<br>
+    Possessions (auto): ${team.P.toFixed(1)}<br>
+    FGA (fixed): ${team.FGA.toFixed(1)}<br>
+    2PA: ${team.twoPA.toFixed(1)}, 3PA: ${team.threePA.toFixed(1)}<br>
     FTA: ${team.FTA.toFixed(1)}<br>
     Off Rebounds: ${team.ORB.toFixed(1)}<br>
     Turnovers: ${team.TOV.toFixed(1)}<br>
@@ -140,11 +154,15 @@ function formatSummary(label, team) {
 }
 
 function update() {
-  const home = calcTeam('h');
-  const away = calcTeam('a');
+  const home = calcTeam('h', BASE_FGA_HOME);
+  const away = calcTeam('a', BASE_FGA_AWAY);
 
-  document.getElementById('homeSummary').innerHTML = formatSummary('Home', home);
-  document.getElementById('awaySummary').innerHTML = formatSummary('Away', away);
+  // write auto possessions back into the read-only boxes
+  document.getElementById('h_pos').value = home.P.toFixed(1);
+  document.getElementById('a_pos').value = away.P.toFixed(1);
+
+  document.getElementById('homeSummary').innerHTML = formatSummary(home);
+  document.getElementById('awaySummary').innerHTML = formatSummary(away);
 
   const rebMargin = (home.ORB - away.ORB).toFixed(1);
   const tovMargin = (away.TOV - home.TOV).toFixed(1); // positive if home has fewer TOs
