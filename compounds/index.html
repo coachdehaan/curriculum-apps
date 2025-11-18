@@ -251,28 +251,57 @@
 
   <script>
     // ======== ELEMENT DATA (first 20, HS core) ========
-    const elements = [
-      {Z:1,  row:1, col:1,  symbol:"H",  name:"Hydrogen",  EN:2.20, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:1},
-      {Z:2,  row:1, col:18, symbol:"He", name:"Helium",    EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
-      {Z:3,  row:2, col:1,  symbol:"Li", name:"Lithium",   EN:0.98, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
-      {Z:4,  row:2, col:2,  symbol:"Be", name:"Beryllium", EN:1.57, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
-      {Z:5,  row:2, col:13, symbol:"B",  name:"Boron",     EN:2.04, category:"metalloid", isMetal:false, isPoly:false},
-      {Z:6,  row:2, col:14, symbol:"C",  name:"Carbon",    EN:2.55, category:"nonmetal",  isMetal:false, isPoly:false},
-      {Z:7,  row:2, col:15, symbol:"N",  name:"Nitrogen",  EN:3.04, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-3},
-      {Z:8,  row:2, col:16, symbol:"O",  name:"Oxygen",    EN:3.44, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-2},
-      {Z:9,  row:2, col:17, symbol:"F",  name:"Fluorine",  EN:3.98, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
-      {Z:10, row:2, col:18, symbol:"Ne", name:"Neon",      EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
-      {Z:11, row:3, col:1,  symbol:"Na", name:"Sodium",    EN:0.93, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
-      {Z:12, row:3, col:2,  symbol:"Mg", name:"Magnesium", EN:1.31, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
-      {Z:13, row:3, col:13, symbol:"Al", name:"Aluminum",  EN:1.61, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:3},
-      {Z:14, row:3, col:14, symbol:"Si", name:"Silicon",   EN:1.90, category:"metalloid", isMetal:false, isPoly:false},
-      {Z:15, row:3, col:15, symbol:"P",  name:"Phosphorus",EN:2.19, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-3},
-      {Z:16, row:3, col:16, symbol:"S",  name:"Sulfur",    EN:2.58, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-2},
-      {Z:17, row:3, col:17, symbol:"Cl", name:"Chlorine",  EN:3.16, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
-      {Z:18, row:3, col:18, symbol:"Ar", name:"Argon",     EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
-      {Z:19, row:4, col:1,  symbol:"K",  name:"Potassium", EN:0.82, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
-      {Z:20, row:4, col:2,  symbol:"Ca", name:"Calcium",   EN:1.00, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2}
-    ];
+    // ======== ELEMENT DATA (Z = 1–36, HS core + more) ========
+const elements = [
+  // Period 1
+  {Z:1,  row:1, col:1,  symbol:"H",  name:"Hydrogen",  EN:2.20, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:1},
+  {Z:2,  row:1, col:18, symbol:"He", name:"Helium",    EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
+
+  // Period 2
+  {Z:3,  row:2, col:1,  symbol:"Li", name:"Lithium",   EN:0.98, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
+  {Z:4,  row:2, col:2,  symbol:"Be", name:"Beryllium", EN:1.57, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
+  {Z:5,  row:2, col:13, symbol:"B",  name:"Boron",     EN:2.04, category:"metalloid", isMetal:false, isPoly:false},
+  {Z:6,  row:2, col:14, symbol:"C",  name:"Carbon",    EN:2.55, category:"nonmetal",  isMetal:false, isPoly:false},
+  {Z:7,  row:2, col:15, symbol:"N",  name:"Nitrogen",  EN:3.04, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-3},
+  {Z:8,  row:2, col:16, symbol:"O",  name:"Oxygen",    EN:3.44, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-2},
+  {Z:9,  row:2, col:17, symbol:"F",  name:"Fluorine",  EN:3.98, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
+  {Z:10, row:2, col:18, symbol:"Ne", name:"Neon",      EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
+
+  // Period 3
+  {Z:11, row:3, col:1,  symbol:"Na", name:"Sodium",    EN:0.93, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
+  {Z:12, row:3, col:2,  symbol:"Mg", name:"Magnesium", EN:1.31, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
+  {Z:13, row:3, col:13, symbol:"Al", name:"Aluminum",  EN:1.61, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:3},
+  {Z:14, row:3, col:14, symbol:"Si", name:"Silicon",   EN:1.90, category:"metalloid", isMetal:false, isPoly:false},
+  {Z:15, row:3, col:15, symbol:"P",  name:"Phosphorus",EN:2.19, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-3},
+  {Z:16, row:3, col:16, symbol:"S",  name:"Sulfur",    EN:2.58, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-2},
+  {Z:17, row:3, col:17, symbol:"Cl", name:"Chlorine",  EN:3.16, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
+  {Z:18, row:3, col:18, symbol:"Ar", name:"Argon",     EN:null, category:"nonmetal",  isMetal:false, isPoly:false},
+
+  // Period 4 – s-block
+  {Z:19, row:4, col:1,  symbol:"K",  name:"Potassium", EN:0.82, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:1},
+  {Z:20, row:4, col:2,  symbol:"Ca", name:"Calcium",   EN:1.00, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
+
+  // Period 4 – d-block (transition metals, mainly for EN/bond discussions here)
+  {Z:21, row:4, col:3,  symbol:"Sc", name:"Scandium",  EN:1.36, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:22, row:4, col:4,  symbol:"Ti", name:"Titanium",  EN:1.54, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:23, row:4, col:5,  symbol:"V",  name:"Vanadium",  EN:1.63, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:24, row:4, col:6,  symbol:"Cr", name:"Chromium",  EN:1.66, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:25, row:4, col:7,  symbol:"Mn", name:"Manganese", EN:1.55, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:26, row:4, col:8,  symbol:"Fe", name:"Iron",      EN:1.83, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:27, row:4, col:9,  symbol:"Co", name:"Cobalt",    EN:1.88, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:28, row:4, col:10, symbol:"Ni", name:"Nickel",    EN:1.91, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:29, row:4, col:11, symbol:"Cu", name:"Copper",    EN:1.90, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:30, row:4, col:12, symbol:"Zn", name:"Zinc",      EN:1.65, category:"metal",     isMetal:true,  isPoly:false, commonIonCharge:2},
+
+  // Period 4 – p-block
+  {Z:31, row:4, col:13, symbol:"Ga", name:"Gallium",   EN:1.81, category:"metal",     isMetal:true,  isPoly:false},
+  {Z:32, row:4, col:14, symbol:"Ge", name:"Germanium", EN:2.01, category:"metalloid", isMetal:false, isPoly:false},
+  {Z:33, row:4, col:15, symbol:"As", name:"Arsenic",   EN:2.18, category:"metalloid", isMetal:false, isPoly:false},
+  {Z:34, row:4, col:16, symbol:"Se", name:"Selenium",  EN:2.55, category:"nonmetal",  isMetal:false, isPoly:false},
+  {Z:35, row:4, col:17, symbol:"Br", name:"Bromine",   EN:2.96, category:"nonmetal",  isMetal:false, isPoly:false, commonIonCharge:-1},
+  {Z:36, row:4, col:18, symbol:"Kr", name:"Krypton",   EN:3.00, category:"nonmetal",  isMetal:false, isPoly:false}
+];
+
 
     // ======== POLYATOMIC IONS ========
     const polyIons = [
