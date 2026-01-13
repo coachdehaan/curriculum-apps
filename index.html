@@ -7,40 +7,94 @@
 <style>
   body{font-family:system-ui,Arial,sans-serif;margin:24px;line-height:1.35;background:#f7f7f7}
   h1{font-size:22px;margin:0 0 12px 0}
+  h2{font-size:18px;margin:28px 0 10px 0}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
   .card{background:#fff;border:1px solid #ccc;border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
   a{color:#0b5bd3;text-decoration:none}
   .mut{color:#555;font-size:13px}
+  .viewer-wrap{background:#fff;border:1px solid #ccc;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 </style>
 </head>
+
 <body>
-  <h1>Mr. DeHaan Classroom Applications</h1>
-  <div class="grid">
-    <div class="card">
-      <strong><a href="./electron-config/">Electron Configuration — Drag & Drop</a></strong>
-      <div class="mut">Place ↑/↓ into orbital boxes (Aufbau + Hund + Pauli). Live element + configs.</div>
-    </div>    <div class="card">
-      <strong><a href="./ionic-nacl/">Ionic Crystal Lattice (NaCl)</a></strong>
-      <div class="mut">Interactive rotating rock-salt lattice with unit-cell toggle, bonds, CN overlay.</div>
-    </div>
-    <div class="card">
-      <strong><a href="./ecology/">Balance the Ecosystem: Interactive Simulator</a></strong>
-      <div class="mut">
-        Adjust sunlight, water, and pollution levels to see how prey and predator populations respond. Observe carrying capacity (<em>K</em>) shifts and discuss stewardship in God’s balanced design.
-      </div>
-    </div>
-    <div class="card">
-      <strong><a href="./quantum-ml/">Quantum Numbers: l and mℓ Visualizer</a></strong>
-      <div class="mut">Pick sublevel (s/p/d/f) and slide mℓ across −l … +l with a live number line.</div>
-    </div>
-    <div class="card">
-      <strong><a href="./spectrometer/">WebCam Spectrometer </a></strong>
-      <div class="mut">Use slit and refractory device with this App to measure wavelengths of light</div>
-    </div>
-    <div class="card">
-      <strong><a href="./presentation/">Presentation Evaluator (App)</a></strong>
-      <div class="mut">Live 1–10 sliders per criterion with averages and teacher controls.</div>
+
+<h1>Mr. DeHaan Classroom Applications</h1>
+
+<div class="grid">
+  <div class="card">
+    <strong><a href="./electron-config/">Electron Configuration — Drag & Drop</a></strong>
+    <div class="mut">Place ↑/↓ into orbital boxes (Aufbau + Hund + Pauli). Live element + configs.</div>
+  </div>
+
+  <div class="card">
+    <strong><a href="./ionic-nacl/">Ionic Crystal Lattice (NaCl)</a></strong>
+    <div class="mut">Interactive rotating rock-salt lattice with unit-cell toggle, bonds, CN overlay.</div>
+  </div>
+
+  <div class="card">
+    <strong><a href="./ecology/">Balance the Ecosystem: Interactive Simulator</a></strong>
+    <div class="mut">
+      Adjust sunlight, water, and pollution levels to see how prey and predator populations respond.
+      Observe carrying capacity (<em>K</em>) shifts and discuss stewardship in God’s balanced design.
     </div>
   </div>
+
+  <div class="card">
+    <strong><a href="./quantum-ml/">Quantum Numbers: l and mℓ Visualizer</a></strong>
+    <div class="mut">Pick sublevel (s/p/d/f) and slide mℓ across −l … +l with a live number line.</div>
+  </div>
+
+  <div class="card">
+    <strong><a href="./spectrometer/">WebCam Spectrometer</a></strong>
+    <div class="mut">Use slit and refractory device with this App to measure wavelengths of light</div>
+  </div>
+
+  <div class="card">
+    <strong><a href="./presentation/">Presentation Evaluator (App)</a></strong>
+    <div class="mut">Live 1–10 sliders per criterion with averages and teacher controls.</div>
+  </div>
+</div>
+
+<!-- ===================== -->
+<!-- ZOOMABLE NOTES VIEWER -->
+<!-- ===================== -->
+
+<h2>Lecture Notes (Zoom & Pan)</h2>
+
+<div class="viewer-wrap">
+  <div id="viewer"
+       style="width:100%; height:85vh; overflow:hidden; border:1px solid #ddd; touch-action:none;">
+    <img id="notesImg"
+         src="notes.jpg"
+         alt="Lecture Notes"
+         style="width:100%; height:auto; display:block; transform-origin:0 0;">
+  </div>
+  <div class="mut" style="margin-top:6px;">
+    Scroll to zoom • Drag to pan • Pinch-zoom supported
+  </div>
+</div>
+
+<!-- Panzoom library -->
+<script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.6.1/dist/panzoom.min.js"></script>
+<script>
+  const img = document.getElementById('notesImg');
+  const viewer = document.getElementById('viewer');
+
+  const panzoom = Panzoom(img, {
+    maxScale: 8,
+    minScale: 0.5,
+    contain: 'outside'
+  });
+
+  viewer.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    panzoom.zoomWithWheel(e);
+  }, { passive: false });
+
+  viewer.addEventListener('dblclick', (e) => {
+    panzoom.zoomIn({ animate: true, focal: e });
+  });
+</script>
+
 </body>
 </html>
